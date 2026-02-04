@@ -10,67 +10,66 @@ const STORAGE_KEY = "week4_todos";
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
 
   useEffect(() => {
     const loadTodos = async () => {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
-      if (data) setTodos(JSON.parse(data));
-      setLoaded(true);
+      if (data) {
+        setTodos(JSON.parse(data));
+      }
     };
 
     loadTodos();
   }, []);
 
-
   useEffect(() => {
-    if (!loaded) return;
-
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
   }, [todos]);
 
 
   const addTodo = (text: string) => {
-    const newTodo: Todo = {id: Date.now().toString(), text, done: false,
+    const newTodo: Todo = {
+      id: Date.now().toString(),
+      text, done: false,
     };
 
-    setTodos([newTodo, ...todos]);
+    setTodos((prev) => [newTodo, ...prev]);
   };
-
 
   const toggleTodo = (id: string) => {
-    const updated = todos.map((t) =>
-      t.id === id ? { ...t, done: !t.done } : t
+    setTodos((prev) =>
+      prev.map((t) =>
+        t.id === id ? { ...t, done: !t.done } : t
+      )
     );
-
-    setTodos(updated);
   };
-
-
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Week 4 Todo</Text>
-
       <AddTodo onAdd={addTodo} />
-
       <FlatList
         data={todos}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TodoItem todo={item} onToggle={toggleTodo} />
         )}
+        ListEmptyComponent={
+          <Text style={styles.empty}>No tasks yet</Text>
+        }
       />
     </SafeAreaView>
   );
 }
 
-
-
 const styles = StyleSheet.create({
-  container: {flex: 1,
+  container: {
+    flex: 1,
   },
-  title: {fontSize: 20, fontWeight: "bold", padding: 10,
+  title: {
+    fontSize: 20, fontWeight: "bold", padding: 10,
+  },
+  empty: {
+    padding: 10, opacity: 1.0,
   },
 });
